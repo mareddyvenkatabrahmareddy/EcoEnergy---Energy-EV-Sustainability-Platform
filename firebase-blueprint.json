@@ -1,0 +1,291 @@
+{
+  "entities": {
+    "UserFacility": {
+      "title": "UserFacility",
+      "description": "Authenticated user's clean energy facility profile, hardware capacities, and active BESS mode.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the facility owner.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the operator.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "role": {
+          "type": "string",
+          "description": "Operational role title.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "organization": {
+          "type": "string",
+          "description": "Facility or campus organization name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Two-letter avatar initials.",
+          "minLength": 1,
+          "maxLength": 4
+        },
+        "joinedDate": {
+          "type": "string",
+          "description": "Human-readable onboarding month and year.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "batteryMode": {
+          "type": "string",
+          "description": "Current Battery Management System dispatch mode.",
+          "enum": ["Charging", "Discharging", "Standby"]
+        },
+        "isSimulating": {
+          "type": "boolean",
+          "description": "Whether live microgrid simulation is enabled."
+        },
+        "solarCapacityKw": {
+          "type": "number",
+          "description": "Configured peak solar array capacity in kWp."
+        },
+        "batteryCapacityKwh": {
+          "type": "number",
+          "description": "Configured BESS bank capacity in kWh."
+        },
+        "alertThresholdKw": {
+          "type": "number",
+          "description": "Configured peak demand alert threshold in kW."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when facility record was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the last configuration update."
+        }
+      },
+      "required": [
+        "uid",
+        "name",
+        "role",
+        "organization",
+        "avatar",
+        "joinedDate",
+        "batteryMode",
+        "isSimulating",
+        "solarCapacityKw",
+        "batteryCapacityKwh",
+        "alertThresholdKw",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Isolated Personally Identifiable Information (email and phone) accessible only to the owning user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the user.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "description": "Verified corporate or personal email address.",
+          "maxLength": 160
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number.",
+          "maxLength": 40
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the last PII update."
+        }
+      },
+      "required": ["uid", "email", "phone", "updatedAt"]
+    },
+    "EVStationRecord": {
+      "title": "EVStationRecord",
+      "description": "Telemetry and session status for a facility EV charging dispenser port.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Station port identifier.",
+          "maxLength": 32,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the facility owner.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Station location label.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "portNumber": {
+          "type": "number",
+          "description": "Numeric charger port index."
+        },
+        "type": {
+          "type": "string",
+          "description": "Charger power tier.",
+          "enum": ["DC Fast (150kW)", "Level 2 (22kW)", "Ultra-Fast (350kW)"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Current operational state.",
+          "enum": ["available", "charging", "finishing", "offline"]
+        },
+        "currentVehicle": {
+          "type": "string",
+          "description": "Connected vehicle label when charging.",
+          "maxLength": 100
+        },
+        "currentPowerKw": {
+          "type": "number",
+          "description": "Active charging rate in kW."
+        },
+        "energyDeliveredKwh": {
+          "type": "number",
+          "description": "Session energy delivered in kWh."
+        },
+        "sessionDurationMinutes": {
+          "type": "number",
+          "description": "Elapsed session minutes."
+        },
+        "socPercent": {
+          "type": "number",
+          "description": "Estimated connected vehicle state of charge percentage."
+        },
+        "operatorName": {
+          "type": "string",
+          "description": "Driver or operator initiating the session.",
+          "maxLength": 80
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the last dispenser update."
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "name",
+        "portNumber",
+        "type",
+        "status",
+        "currentPowerKw",
+        "energyDeliveredKwh",
+        "sessionDurationMinutes",
+        "updatedAt"
+      ]
+    },
+    "NotificationRecord": {
+      "title": "NotificationRecord",
+      "description": "System and telemetry alert notification scoped to an authenticated facility owner.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Notification identifier.",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the recipient.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short notification headline.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "description": "Detailed event description.",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "timeLabel": {
+          "type": "string",
+          "description": "Relative or clock display timestamp label.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "type": {
+          "type": "string",
+          "description": "Notification severity category.",
+          "enum": ["info", "warning", "success"]
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether the notification has been read."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when notification was created."
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "title",
+        "message",
+        "timeLabel",
+        "type",
+        "read",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserFacility"
+      },
+      "description": "Stores each authenticated user's facility profile, hardware settings, and active battery dispatch mode."
+    },
+    "/users/{userId}/private/{docId}": {
+      "schema": {
+        "$ref": "#/entities/UserPrivateInfo"
+      },
+      "description": "Isolated PII subcollection storing verified email and phone number strictly readable/writable by the owning user."
+    },
+    "/users/{userId}/evStations/{stationId}": {
+      "schema": {
+        "$ref": "#/entities/EVStationRecord"
+      },
+      "description": "Persisted state and charging telemetry for each EV charging dispenser belonging to the user's facility."
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": {
+        "$ref": "#/entities/NotificationRecord"
+      },
+      "description": "System alerts and EV charging notifications scoped strictly to the owning user."
+    }
+  }
+}

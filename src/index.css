@@ -1,0 +1,279 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg-main: #000000;
+    --bg-section: #000000;
+    --bg-card: #101010;
+    --bg-card-secondary: #181818;
+    --primary-accent: #00C781;
+    --highlight: #00E5A0;
+    --text-heading: #FFFFFF;
+    --text-body: #E0E0E0;
+    --text-secondary: #AAB8C5;
+    --border-color: #292929;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #292929;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00C781;
+}
+
+.font-heading {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-mono-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Animated Leaf Background Keyframes & Classes (EcoEnergy Login)
+   ========================================================================== */
+
+@keyframes leafFloatSlow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(10px, -22px, 0) rotate(2.4deg);
+  }
+}
+
+@keyframes leafFloatMedium {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-12px, -18px, 0) rotate(-2.8deg);
+  }
+}
+
+@keyframes leafFloatGentle {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate3d(8px, -12px, 0) rotate(2deg);
+  }
+  66% {
+    transform: translate3d(-6px, -18px, 0) rotate(-1.5deg);
+  }
+}
+
+@keyframes leafSwayBreeze {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  40% {
+    transform: translate3d(14px, -16px, 0) rotate(3deg) scale(1.02);
+  }
+  75% {
+    transform: translate3d(-6px, -8px, 0) rotate(-2deg) scale(0.985);
+  }
+}
+
+@keyframes emeraldPulseAmbient {
+  0%, 100% {
+    opacity: 0.30;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.52;
+    transform: scale(1.08);
+  }
+}
+
+.leaf-anim-left-main {
+  animation: leafFloatSlow 18s ease-in-out infinite;
+  transform-origin: 20% 80%;
+  will-change: transform;
+}
+
+.leaf-anim-bottom-left {
+  animation: leafSwayBreeze 16s ease-in-out infinite;
+  animation-delay: -4s;
+  transform-origin: bottom left;
+  will-change: transform;
+}
+
+.leaf-anim-bottom-right {
+  animation: leafFloatMedium 15s ease-in-out infinite;
+  animation-delay: -2.5s;
+  transform-origin: bottom right;
+  will-change: transform;
+}
+
+.leaf-anim-float-1 {
+  animation: leafFloatGentle 13s ease-in-out infinite;
+  animation-delay: -6s;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.leaf-anim-float-2 {
+  animation: leafFloatSlow 20s ease-in-out infinite;
+  animation-delay: -11s;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.leaf-anim-pulse-glow {
+  animation: emeraldPulseAmbient 14s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes leafRefSwayAndFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  35% {
+    transform: translate3d(8px, -14px, 0) rotate(1.8deg);
+  }
+  70% {
+    transform: translate3d(-6px, -8px, 0) rotate(-1.4deg);
+  }
+}
+
+@keyframes waveAmbientBreath {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+    opacity: 1;
+  }
+}
+
+.leaf-anim-ref-sway {
+  animation: leafRefSwayAndFloat 16s ease-in-out infinite;
+  transform-origin: 15% 85%;
+  will-change: transform;
+}
+
+.leaf-anim-wave-breath {
+  animation: waveAmbientBreath 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Flowing waves keyframes (Left-to-Right + gentle vertical undulation) */
+@keyframes waveFlowLtoR1 {
+  0% {
+    transform: translate3d(-1440px, 0, 0);
+  }
+  50% {
+    transform: translate3d(-720px, -9px, 0);
+  }
+  100% {
+    transform: translate3d(0px, 0, 0);
+  }
+}
+
+@keyframes waveFlowLtoR2 {
+  0% {
+    transform: translate3d(-1440px, 0, 0);
+  }
+  50% {
+    transform: translate3d(-720px, 11px, 0);
+  }
+  100% {
+    transform: translate3d(0px, 0, 0);
+  }
+}
+
+@keyframes waveFlowLtoR3 {
+  0% {
+    transform: translate3d(-1440px, 0, 0);
+  }
+  50% {
+    transform: translate3d(-720px, -7px, 0);
+  }
+  100% {
+    transform: translate3d(0px, 0, 0);
+  }
+}
+
+@keyframes waveFlowLtoR4 {
+  0% {
+    transform: translate3d(-1440px, 0, 0);
+  }
+  50% {
+    transform: translate3d(-720px, 8px, 0);
+  }
+  100% {
+    transform: translate3d(0px, 0, 0);
+  }
+}
+
+@keyframes waveNeonPulseGlow {
+  0%, 100% {
+    opacity: 0.65;
+    filter: drop-shadow(0 0 6px rgba(0, 229, 160, 0.4));
+  }
+  50% {
+    opacity: 0.92;
+    filter: drop-shadow(0 0 14px rgba(0, 255, 178, 0.7));
+  }
+}
+
+.anim-wave-flow-1 {
+  animation: waveFlowLtoR1 14s linear infinite;
+  will-change: transform;
+}
+
+.anim-wave-flow-2 {
+  animation: waveFlowLtoR2 17s linear infinite;
+  will-change: transform;
+}
+
+.anim-wave-flow-3 {
+  animation: waveFlowLtoR3 12s linear infinite;
+  will-change: transform;
+}
+
+.anim-wave-flow-4 {
+  animation: waveFlowLtoR4 18s linear infinite;
+  will-change: transform;
+}
+
+.anim-wave-pulse {
+  animation: waveNeonPulseGlow 7s ease-in-out infinite;
+  will-change: opacity, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf-anim-left-main,
+  .leaf-anim-bottom-left,
+  .leaf-anim-bottom-right,
+  .leaf-anim-float-1,
+  .leaf-anim-float-2,
+  .leaf-anim-pulse-glow,
+  .leaf-anim-ref-sway,
+  .leaf-anim-wave-breath,
+  .anim-wave-flow-1,
+  .anim-wave-flow-2,
+  .anim-wave-flow-3,
+  .anim-wave-flow-4,
+  .anim-wave-pulse {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+
+

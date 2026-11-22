@@ -1,0 +1,6 @@
+{
+  "name": "EcoEnergy - Energy, EV & Sustainability Platform",
+  "description": "Unified platform for monitoring solar energy production, battery storage systems (BMS), electric vehicle charging stations, smart meters, carbon tracking, and waste-to-value circular operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

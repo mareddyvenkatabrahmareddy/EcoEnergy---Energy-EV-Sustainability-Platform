@@ -1,0 +1,221 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // PRIMITIVE HELPERS
+    // =========================================================================
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isFacilityParentOwner(userId) {
+      return isOwner(userId)
+        && exists(/databases/$(database)/documents/users/$(userId))
+        && get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid;
+    }
+
+    // =========================================================================
+    // VALIDATION BLUEPRINTS (Create & Update)
+    // =========================================================================
+    function isValidUserFacility(data) {
+      return data.keys().hasAll([
+          'uid', 'name', 'role', 'organization', 'avatar', 'joinedDate',
+          'batteryMode', 'isSimulating', 'solarCapacityKw', 'batteryCapacityKwh',
+          'alertThresholdKw', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'name', 'role', 'organization', 'avatar', 'joinedDate',
+          'batteryMode', 'isSimulating', 'solarCapacityKw', 'batteryCapacityKwh',
+          'alertThresholdKw', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.role is string && data.role.size() >= 1 && data.role.size() <= 80
+        && data.organization is string && data.organization.size() >= 1 && data.organization.size() <= 120
+        && data.avatar is string && data.avatar.size() >= 1 && data.avatar.size() <= 4
+        && data.joinedDate is string && data.joinedDate.size() >= 1 && data.joinedDate.size() <= 40
+        && data.batteryMode in ['Charging', 'Discharging', 'Standby']
+        && data.isSimulating is bool
+        && data.solarCapacityKw is number && data.solarCapacityKw >= 1 && data.solarCapacityKw <= 100000
+        && data.batteryCapacityKwh is number && data.batteryCapacityKwh >= 1 && data.batteryCapacityKwh <= 100000
+        && data.alertThresholdKw is number && data.alertThresholdKw >= 1 && data.alertThresholdKw <= 100000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidUserPrivateInfo(data) {
+      return data.keys().hasAll(['uid', 'email', 'phone', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'phone', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.phone is string && data.phone.size() <= 40
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidEVStation(data) {
+      return data.keys().hasAll([
+          'id', 'ownerId', 'name', 'portNumber', 'type', 'status',
+          'currentPowerKw', 'energyDeliveredKwh', 'sessionDurationMinutes', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'ownerId', 'name', 'portNumber', 'type', 'status',
+          'currentVehicle', 'currentPowerKw', 'energyDeliveredKwh',
+          'sessionDurationMinutes', 'socPercent', 'operatorName', 'updatedAt'
+        ])
+        && isValidId(data.id)
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.portNumber is number && data.portNumber >= 1 && data.portNumber <= 64
+        && data.type in ['DC Fast (150kW)', 'Level 2 (22kW)', 'Ultra-Fast (350kW)']
+        && data.status in ['available', 'charging', 'finishing', 'offline']
+        && (!('currentVehicle' in data) || (data.currentVehicle is string && data.currentVehicle.size() <= 100))
+        && data.currentPowerKw is number && data.currentPowerKw >= 0 && data.currentPowerKw <= 1000
+        && data.energyDeliveredKwh is number && data.energyDeliveredKwh >= 0 && data.energyDeliveredKwh <= 10000
+        && data.sessionDurationMinutes is number && data.sessionDurationMinutes >= 0 && data.sessionDurationMinutes <= 10080
+        && (!('socPercent' in data) || (data.socPercent is number && data.socPercent >= 0 && data.socPercent <= 100))
+        && (!('operatorName' in data) || (data.operatorName is string && data.operatorName.size() <= 80))
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidNotification(data) {
+      return data.keys().hasAll(['id', 'ownerId', 'title', 'message', 'timeLabel', 'type', 'read', 'createdAt'])
+        && data.keys().hasOnly(['id', 'ownerId', 'title', 'message', 'timeLabel', 'type', 'read', 'createdAt'])
+        && isValidId(data.id)
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 120
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 400
+        && data.timeLabel is string && data.timeLabel.size() >= 1 && data.timeLabel.size() <= 40
+        && data.type in ['info', 'warning', 'success']
+        && data.read is bool
+        && data.createdAt is timestamp;
+    }
+
+    // =========================================================================
+    // COLLECTION MATCH RULES
+    // =========================================================================
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserFacility(incoming())
+        && incoming().uid == userId
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserFacility(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'organization', 'avatar', 'solarCapacityKw', 'batteryCapacityKwh', 'alertThresholdKw', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['batteryMode', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['isSimulating', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['name', 'avatar', 'updatedAt'])
+        );
+      allow delete: if false;
+
+      // Split PII subcollection (email, phone)
+      match /private/{docId} {
+        allow get: if isValidId(userId) && isValidId(docId) && docId == 'info' && isOwner(userId);
+        allow list: if false;
+        allow create: if isValidId(userId)
+          && isValidId(docId)
+          && docId == 'info'
+          && isOwner(userId)
+          && isValidUserPrivateInfo(incoming())
+          && incoming().updatedAt == request.time
+          && isFacilityParentOwner(userId);
+        allow update: if isValidId(userId)
+          && isValidId(docId)
+          && docId == 'info'
+          && isOwner(userId)
+          && isValidUserPrivateInfo(incoming())
+          && incoming().uid == existing().uid
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'phone', 'updatedAt'])
+          && isFacilityParentOwner(userId);
+        allow delete: if false;
+      }
+
+      // Facility EV Charging Stations
+      match /evStations/{stationId} {
+        allow get: if isValidId(userId) && isValidId(stationId) && isFacilityParentOwner(userId);
+        allow list: if isVerifiedUser() && resource.data.ownerId == request.auth.uid;
+        allow create: if isValidId(userId)
+          && isValidId(stationId)
+          && isOwner(userId)
+          && isValidEVStation(incoming())
+          && incoming().id == stationId
+          && incoming().updatedAt == request.time
+          && isFacilityParentOwner(userId);
+        allow update: if isValidId(userId)
+          && isValidId(stationId)
+          && isOwner(userId)
+          && isValidEVStation(incoming())
+          && incoming().id == existing().id
+          && incoming().ownerId == existing().ownerId
+          && incoming().updatedAt == request.time
+          && (
+            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'currentVehicle', 'currentPowerKw', 'energyDeliveredKwh', 'sessionDurationMinutes', 'socPercent', 'operatorName', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['energyDeliveredKwh', 'sessionDurationMinutes', 'socPercent', 'updatedAt'])
+          )
+          && isFacilityParentOwner(userId);
+        allow delete: if false;
+      }
+
+      // User Notifications
+      match /notifications/{notificationId} {
+        allow get: if isValidId(userId) && isValidId(notificationId) && isFacilityParentOwner(userId);
+        allow list: if isVerifiedUser() && resource.data.ownerId == request.auth.uid;
+        allow create: if isValidId(userId)
+          && isValidId(notificationId)
+          && isOwner(userId)
+          && isValidNotification(incoming())
+          && incoming().id == notificationId
+          && incoming().createdAt == request.time
+          && isFacilityParentOwner(userId);
+        allow update: if isValidId(userId)
+          && isValidId(notificationId)
+          && isOwner(userId)
+          && isValidNotification(incoming())
+          && incoming().id == existing().id
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().diff(existing()).affectedKeys().hasOnly(['read'])
+          && isFacilityParentOwner(userId);
+        allow delete: if isValidId(userId) && isValidId(notificationId) && isFacilityParentOwner(userId);
+      }
+    }
+  }
+}
